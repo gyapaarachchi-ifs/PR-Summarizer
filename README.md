@@ -23,7 +23,7 @@ This showcases the power of AI-assisted development in creating production-ready
 - 📊 **Comprehensive Insights** - Business context, technical analysis, and risk assessment
 - 🎯 **Reviewer Guidance** - Automated suggestions for code reviewers
 - 🚀 **Fast Processing** - Complete analysis in ~8 seconds
-- 🔧 **Extensible Architecture** - Ready for Jira and Confluence integration
+- 🔧 **Extensible Architecture** - Ready for Jira and Confluence integration (TO-DO)
 
 ## 🏗️ Technical Architecture
 
