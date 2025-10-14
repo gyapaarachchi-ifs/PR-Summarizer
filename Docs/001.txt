@@ -1,0 +1,28 @@
+/speckit.constitution Fill the constitution with the bare minimum requirements for AI-powered AgenticRAG. Focus on code quality, testing standards, user experience consistency, and performance requirements
+
+
+/speckit.specify 
+AI-powered tool designed to automatically generate comprehensive summaries for software development pull requests (PRs). Through a web application it takes a jira ticket and the github PR details. When clicked ok, It acts as an intelligent assistant for code reviewers by gathering context from multiple sources, feeding it to a Large Language Model (LLM), and then presenting a structured, easy-to-digest summary. The primary goal is to accelerate the code review process by providing reviewers with all the necessary business and technical context in one place.
+
+The application integrates with several services to build a complete picture of a PR:
+
+- Pulls PR Data from GitHub
+- Fetches Ticket Details from Jira
+- Incorporates Business Knowledge from Confluence, Google Docs.
+
+Then the app generates AI Summaries with Google Gemini LLM. It should structure the summary in following structure
+
+- Business Context: Why the change is being made.
+- Code Change Summary: What was changed and where.
+- Business/Code Impact: Who or what will be affected by the change.
+- Suggested Test Cases: How to verify the changes.
+- Risk & Complexity: An assessment of the change's potential risk.
+- Reviewer Guidance: Pointers on what parts of the code need the most attention.
+
+The final summary should be posted as separate text in the app.
+
+/speckit.plan  I would like to use python for this. LLM would be gemini-2.5-pro with API key access. No vector db with embeddings for now. 
+
+/speckit.tasks Lets break this down to small and manageable tasks.
+
+/speckit.implement Implement the tasks and update the task list as you go.

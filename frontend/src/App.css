@@ -1,0 +1,575 @@
+/**
+ * App Styles
+ * Task: T037 - Main App component styling
+ * 
+ * Root application styles with layout, theming, responsive design,
+ * and accessibility features for the PR Summarizer app.
+ */
+
+/* ===== ROOT STYLES ===== */
+.app {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .app {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  }
+}
+
+/* ===== HEADER ===== */
+.app__header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2rem 1rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__header {
+    background: rgba(31, 41, 55, 0.95);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.app__header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.app__title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  line-height: 1.2;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__title {
+    color: #f8fafc;
+  }
+}
+
+.app__title-icon {
+  font-size: 2rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.app__subtitle {
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__subtitle {
+    color: #9ca3af;
+  }
+}
+
+/* ===== HEALTH STATUS ===== */
+.app__health-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.app__health-status--healthy {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.app__health-status--unhealthy {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.app__health-status--unknown {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__health-status--healthy {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+  }
+
+  .app__health-status--unhealthy {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+
+  .app__health-status--unknown {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9ca3af;
+  }
+}
+
+.app__health-icon {
+  font-size: 1rem;
+}
+
+.app__health-text {
+  white-space: nowrap;
+}
+
+/* ===== MAIN CONTENT ===== */
+.app__main {
+  flex: 1;
+  padding: 2rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 0; /* Allow flexbox shrinking */
+}
+
+.app__container {
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* ===== SECTIONS ===== */
+.app__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.app__section--input {
+  position: sticky;
+  top: 2rem;
+}
+
+.app__section--summary {
+  min-height: 400px;
+}
+
+/* ===== LOADING STATUS ===== */
+.app__loading-status {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__loading-status {
+    background: rgba(31, 41, 55, 0.95);
+    border-color: rgba(96, 165, 250, 0.2);
+  }
+}
+
+.app__loading-message {
+  font-size: 1rem;
+  color: #3b82f6;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__loading-message {
+    color: #60a5fa;
+  }
+}
+
+.app__loading-progress {
+  width: 100%;
+}
+
+.app__loading-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__loading-bar {
+    background: rgba(96, 165, 250, 0.2);
+  }
+}
+
+.app__loading-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8, #3b82f6);
+  border-radius: 2px;
+  animation: loading-wave 2s ease-in-out infinite;
+}
+
+@keyframes loading-wave {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(50%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ===== FOOTER ===== */
+.app__footer {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.5rem 1rem;
+  text-align: center;
+  margin-top: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__footer {
+    background: rgba(31, 41, 55, 0.95);
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.app__footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.app__footer-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__footer-text {
+    color: #9ca3af;
+  }
+}
+
+.app__footer-links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.app__footer-link {
+  background: none;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.app__footer-link:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__footer-link {
+    border-color: #4b5563;
+    color: #9ca3af;
+  }
+
+  .app__footer-link:hover {
+    background: #374151;
+    border-color: #6b7280;
+    color: #d1d5db;
+  }
+}
+
+/* ===== SERVICE ERROR OVERLAY ===== */
+.app__service-error {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.app__service-error-content {
+  background: #ffffff;
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__service-error-content {
+    background: #1f2937;
+  }
+}
+
+.app__service-error-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #dc2626;
+  margin: 0 0 1rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__service-error-title {
+    color: #f87171;
+  }
+}
+
+.app__service-error-message {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0 0 2rem 0;
+  line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__service-error-message {
+    color: #9ca3af;
+  }
+}
+
+.app__service-error-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.app__service-error-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.app__service-error-button:hover {
+  background: #b91c1c;
+}
+
+.app__service-error-button-icon {
+  font-size: 1.125rem;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+  .app__container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    max-width: 800px;
+  }
+
+  .app__section--input {
+    position: static;
+  }
+
+  .app__main {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .app__header {
+    padding: 1.5rem 1rem;
+  }
+
+  .app__title {
+    font-size: 2rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .app__subtitle {
+    font-size: 1rem;
+  }
+
+  .app__main {
+    padding: 1rem;
+  }
+
+  .app__container {
+    gap: 1.5rem;
+  }
+
+  .app__footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .app__footer-links {
+    justify-content: center;
+  }
+
+  .app__service-error-content {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app__header {
+    padding: 1rem 0.75rem;
+  }
+
+  .app__title {
+    font-size: 1.75rem;
+  }
+
+  .app__main {
+    padding: 0.75rem;
+  }
+
+  .app__container {
+    gap: 1rem;
+  }
+
+  .app__loading-status {
+    padding: 1rem;
+  }
+
+  .app__footer {
+    padding: 1rem 0.75rem;
+  }
+
+  .app__service-error-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .app__service-error-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  .app__title-icon,
+  .app__loading-fill {
+    animation: none;
+  }
+
+  .app__health-status,
+  .app__footer-link,
+  .app__service-error-button {
+    transition: none;
+  }
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+  .app {
+    background: #000000;
+    color: #ffffff;
+  }
+
+  .app__header,
+  .app__footer {
+    background: #ffffff;
+    border-color: #000000;
+    color: #000000;
+  }
+
+  .app__loading-status {
+    background: #ffffff;
+    border-color: #000000;
+    color: #000000;
+  }
+}
+
+/* Focus indicators for keyboard navigation */
+.app__footer-link:focus-visible,
+.app__service-error-button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .app {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .app__header {
+    background: #ffffff;
+    box-shadow: none;
+    border-bottom: 1px solid #000000;
+  }
+
+  .app__footer,
+  .app__service-error,
+  .app__loading-status {
+    display: none;
+  }
+
+  .app__container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

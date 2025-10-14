@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./config:/app/config
+    environment:
+      - PYTHONPATH=/app/src
+      - RELOAD=true
+    env_file:
+      - ./config/.env
+    depends_on:
+      - redis
+    networks:
+      - pr-summarizer
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    networks:
+      - pr-summarizer
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - pr-summarizer
+
+networks:
+  pr-summarizer:
+    driver: bridge
+
+volumes:
+  node_modules:

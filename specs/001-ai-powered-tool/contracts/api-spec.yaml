@@ -1,0 +1,534 @@
+openapi: 3.0.3
+info:
+  title: AI-Powered PR Summarizer API
+  description: |
+    REST API for generating comprehensive summaries of GitHub Pull Requests by integrating
+    data from GitHub, Jira, Confluence, and Google Docs, then processing through Google Gemini LLM.
+    
+    ## Features
+    - Six-section structured summaries (Business Context, Code Changes, Impact, Test Cases, Risk Assessment, Review Guidance)
+    - Multi-source integration (GitHub, Jira, Confluence, Google Docs)  
+    - Async processing with status updates
+    - Graceful degradation when services are unavailable
+    
+    ## Rate Limits
+    - 100 requests per hour per user
+    - 10 concurrent requests maximum
+    
+  version: 1.0.0
+  contact:
+    name: PR Summarizer Team
+    email: support@prsummarizer.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.prsummarizer.com/v1
+    description: Production server
+  - url: https://staging-api.prsummarizer.com/v1  
+    description: Staging server
+  - url: http://localhost:8000/v1
+    description: Local development server
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the API and connected services
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service health information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: "healthy"
+                services:
+                  github: "healthy"
+                  jira: "healthy" 
+                  confluence: "degraded"
+                  google_docs: "healthy"
+                  gemini: "healthy"
+                timestamp: "2025-10-13T10:30:00Z"
+                uptime_seconds: 86400
+
+  /summary:
+    post:
+      summary: Generate PR summary
+      description: |
+        Creates a comprehensive summary of a GitHub Pull Request by gathering context from
+        multiple sources and processing through AI. Returns a structured six-section summary.
+        
+        Processing typically takes 15-30 seconds. The API supports graceful degradation - 
+        if some services are unavailable, a partial summary will be generated from available sources.
+      operationId: generateSummary
+      tags:
+        - Summary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SummaryRequest'
+            example:
+              github_pr_url: "https://github.com/company/repo/pull/123"
+              jira_ticket_id: "PROJ-456"
+      responses:
+        '200':
+          description: Summary generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SummarySuccessResponse'
+              example:
+                success: true
+                data:
+                  request_id: "req_123e4567-e89b-12d3-a456-426614174000"
+                  github_pr_url: "https://github.com/company/repo/pull/123"
+                  jira_ticket_id: "PROJ-456"
+                  business_context:
+                    title: "Business Context"
+                    content: "This change implements user authentication for the mobile app to address security requirements from the Q4 audit. The feature enables secure login/logout functionality and session management as specified in PROJ-456."
+                    word_count: 32
+                  code_change_summary:
+                    title: "Code Change Summary" 
+                    content: "Modified 8 files across authentication and user management modules. Added AuthService.java (150 lines), updated UserController.java with login endpoints, and enhanced security configuration. Database schema updated with user_sessions table."
+                    word_count: 34
+                  business_code_impact:
+                    title: "Business/Code Impact"
+                    content: "Affects all mobile app users during next release. Requires database migration and updated API client configurations. No breaking changes to existing user data or functionality."
+                    word_count: 29
+                  suggested_test_cases:
+                    title: "Suggested Test Cases"
+                    content: "Test valid/invalid login credentials, session timeout behavior, concurrent login attempts, password reset flow, and logout functionality. Verify database constraints and API error responses."
+                    word_count: 26
+                  risk_complexity:
+                    title: "Risk & Complexity" 
+                    content: "Medium complexity - touches authentication flow and database schema. Main risks: session management edge cases and potential security vulnerabilities. Recommend security review before deployment."
+                    word_count: 28
+                  reviewer_guidance:
+                    title: "Reviewer Guidance"
+                    content: "Focus on AuthService.java security implementation, SQL injection prevention in user queries, and proper session handling. Verify error messages don't leak sensitive information."
+                    word_count: 26
+                  total_word_count: 175
+                  sources_used: ["github", "jira", "confluence"]
+                  generation_time_seconds: 18.5
+                  generated_at: "2025-10-13T10:30:15Z"
+                request_id: "req_123e4567-e89b-12d3-a456-426614174000"
+                processing_time_ms: 18500
+                sources_attempted: 4
+                sources_successful: 3
+                partial_failure: true
+        '400':
+          description: Invalid request (bad URL format, invalid Jira ID, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error:
+                  error_code: "invalid_input"
+                  message: "Invalid GitHub PR URL format"
+                  details:
+                    field: "github_pr_url"
+                    provided: "github.com/user/repo/pull/123"
+                    expected: "https://github.com/user/repo/pull/123"
+                  timestamp: "2025-10-13T10:30:00Z"
+                request_id: "req_123e4567-e89b-12d3-a456-426614174000"
+                processing_time_ms: 50
+        '401':
+          description: Authentication failed for external services
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '408':
+          description: Request timeout (processing took longer than 30 seconds)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Service unavailable (too many external services down)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /summary/{request_id}/status:
+    get:
+      summary: Get summary generation status
+      description: |
+        Check the status of a summary generation request. Useful for long-running requests
+        or when implementing polling-based UIs.
+      operationId: getSummaryStatus
+      tags:
+        - Summary
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          description: The request ID returned from POST /summary
+          schema:
+            type: string
+            format: uuid
+            example: "req_123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Status information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+              examples:
+                processing:
+                  summary: Request still processing
+                  value:
+                    success: true
+                    data:
+                      request_id: "req_123e4567-e89b-12d3-a456-426614174000"
+                      status: "processing"
+                      created_at: "2025-10-13T10:30:00Z"
+                      current_step: "Gathering Confluence documentation"
+                      estimated_completion: "2025-10-13T10:30:25Z"
+                    request_id: "req_123e4567-e89b-12d3-a456-426614174000"
+                    processing_time_ms: 15
+                completed:
+                  summary: Request completed successfully
+                  value:
+                    success: true
+                    data:
+                      request_id: "req_123e4567-e89b-12d3-a456-426614174000"
+                      status: "completed"
+                      created_at: "2025-10-13T10:30:00Z"
+                      completed_at: "2025-10-13T10:30:18Z"
+                      result_available: true
+                    request_id: "req_123e4567-e89b-12d3-a456-426614174000"
+                    processing_time_ms: 12
+        '404':
+          description: Request ID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    SummaryRequest:
+      type: object
+      required:
+        - github_pr_url
+        - jira_ticket_id
+      properties:
+        github_pr_url:
+          type: string
+          format: uri
+          pattern: '^https://github\.com/[\w\-\.]+/[\w\-\.]+/pull/\d+$'
+          description: GitHub Pull Request URL
+          example: "https://github.com/company/repo/pull/123"
+        jira_ticket_id:
+          type: string
+          pattern: '^[A-Z]+\-\d+$'
+          description: Jira ticket identifier (PROJECT-123 format)
+          example: "PROJ-456"
+      additionalProperties: false
+
+    SummarySection:
+      type: object
+      required:
+        - title
+        - content
+        - word_count
+      properties:
+        title:
+          type: string
+          description: Section title
+          example: "Business Context"
+        content:
+          type: string
+          minLength: 10
+          maxLength: 1000
+          description: Section content (50-300 words typical)
+          example: "This change implements user authentication for the mobile app..."
+        word_count:
+          type: integer
+          minimum: 1
+          description: Number of words in the content
+          example: 32
+
+    PRSummary:
+      type: object
+      required:
+        - request_id
+        - github_pr_url
+        - jira_ticket_id
+        - business_context
+        - code_change_summary
+        - business_code_impact
+        - suggested_test_cases
+        - risk_complexity
+        - reviewer_guidance
+        - total_word_count
+        - sources_used
+        - generation_time_seconds
+        - generated_at
+      properties:
+        request_id:
+          type: string
+          format: uuid
+          description: Unique identifier for this summary request
+        github_pr_url:
+          type: string
+          format: uri
+          description: The GitHub PR URL that was analyzed
+        jira_ticket_id:
+          type: string
+          description: The Jira ticket ID that was analyzed
+        business_context:
+          $ref: '#/components/schemas/SummarySection'
+        code_change_summary:
+          $ref: '#/components/schemas/SummarySection'
+        business_code_impact:
+          $ref: '#/components/schemas/SummarySection'
+        suggested_test_cases:
+          $ref: '#/components/schemas/SummarySection'
+        risk_complexity:
+          $ref: '#/components/schemas/SummarySection'
+        reviewer_guidance:
+          $ref: '#/components/schemas/SummarySection'
+        total_word_count:
+          type: integer
+          minimum: 100
+          maximum: 2000
+          description: Total words across all sections
+        sources_used:
+          type: array
+          items:
+            type: string
+            enum: [github, jira, confluence, google_docs]
+          description: Which external services successfully provided data
+          example: ["github", "jira", "confluence"]
+        generation_time_seconds:
+          type: number
+          format: float
+          minimum: 0
+          description: Time taken to generate the summary
+          example: 18.5
+        model_confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: AI model confidence score (if available)
+          example: 0.87
+        generated_at:
+          type: string
+          format: date-time
+          description: Timestamp when summary was generated
+
+    RequestStatus:
+      type: object
+      required:
+        - request_id
+        - status
+        - created_at
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+          description: Current status of the request
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          description: When request completed (if applicable)
+        current_step:
+          type: string
+          description: Current processing step (if status is processing)
+          example: "Gathering Confluence documentation"
+        estimated_completion:
+          type: string
+          format: date-time
+          description: Estimated completion time (if status is processing)
+        error_message:
+          type: string
+          description: Error details (if status is failed)
+        result_available:
+          type: boolean
+          description: Whether the result can be retrieved (if status is completed)
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - services
+        - timestamp
+        - uptime_seconds
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+          description: Overall system health
+        services:
+          type: object
+          additionalProperties:
+            type: string
+            enum: [healthy, degraded, unhealthy]
+          description: Health status of each external service
+          example:
+            github: "healthy"
+            jira: "healthy"
+            confluence: "degraded"
+            google_docs: "healthy"
+            gemini: "healthy"
+        timestamp:
+          type: string
+          format: date-time
+        uptime_seconds:
+          type: integer
+          minimum: 0
+          description: How long the service has been running
+
+    APIError:
+      type: object
+      required:
+        - error_code
+        - message
+        - timestamp
+      properties:
+        error_code:
+          type: string
+          enum:
+            - invalid_input
+            - service_unavailable
+            - authentication_failed
+            - rate_limit_exceeded
+            - processing_timeout
+            - llm_generation_failed
+            - unknown_error
+          description: Specific error code for programmatic handling
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Invalid GitHub PR URL format"
+        details:
+          type: object
+          description: Additional error context (varies by error type)
+          example:
+            field: "github_pr_url"
+            provided: "github.com/user/repo/pull/123"
+            expected: "https://github.com/user/repo/pull/123"
+        request_id:
+          type: string
+          format: uuid
+          description: Request ID for error tracking
+        timestamp:
+          type: string
+          format: date-time
+
+    SummarySuccessResponse:
+      type: object
+      required:
+        - success
+        - data
+        - request_id
+        - processing_time_ms
+        - sources_attempted
+        - sources_successful
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          $ref: '#/components/schemas/PRSummary'
+        request_id:
+          type: string
+          format: uuid
+        processing_time_ms:
+          type: integer
+          minimum: 0
+          description: Total processing time in milliseconds
+        sources_attempted:
+          type: integer
+          minimum: 1
+          description: Number of external services contacted
+        sources_successful:
+          type: integer
+          minimum: 0
+          description: Number of external services that returned data
+        partial_failure:
+          type: boolean
+          description: True if some services failed but summary was still generated
+          default: false
+
+    StatusResponse:
+      type: object
+      required:
+        - success
+        - data
+        - request_id
+        - processing_time_ms
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          $ref: '#/components/schemas/RequestStatus'
+        request_id:
+          type: string
+          format: uuid
+        processing_time_ms:
+          type: integer
+          minimum: 0
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+        - request_id
+        - processing_time_ms
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        error:
+          $ref: '#/components/schemas/APIError'
+        request_id:
+          type: string
+          format: uuid
+        processing_time_ms:
+          type: integer
+          minimum: 0
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication (future enhancement)
+
+security: []  # No authentication required initially
+
+tags:
+  - name: Health
+    description: System health and monitoring endpoints
+  - name: Summary
+    description: PR summary generation and status endpoints
