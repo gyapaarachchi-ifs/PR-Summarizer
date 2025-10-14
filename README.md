@@ -1,7 +1,7 @@
 # PR Summarizer
 
 > **AI-Powered Pull Request Analysis and Summarization Tool**  
-> *A Proof of Concept for SpecKit*  
+> *A Proof of Concept for [SpecKit](https://github.com/github/spec-kit)*  
 > **🤖 Entirely Built by AI using VS Code, GitHub Copilot & Claude Sonnet 4**
 
 ## 🎯 Purpose
