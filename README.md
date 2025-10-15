@@ -299,20 +299,6 @@ This project demonstrates the capabilities of modern AI-assisted development:
 
 This project serves as a testament to the productivity gains possible when human creativity meets AI-powered development tools.
 
-## �🤝 Contributing
-
-This is a Proof of Concept for SpecKit. For contributions or questions:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
-
-## 📄 License
-
-[Add your license information here]
-
 ## 🎯 SpecKit Integration
 
 This project demonstrates core capabilities that will be integrated into SpecKit:
